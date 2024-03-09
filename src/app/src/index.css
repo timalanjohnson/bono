@@ -2,10 +2,11 @@
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
+  font-size: 1.5rem;
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  background-color: #000000;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -24,15 +25,28 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
-  min-height: 100vh;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+.logo {
+  padding-left: 8px;
+  display: flex;
+  align-items: baseline;
+}
+
+.logo > * {
+  padding: 0;
+  margin: 0;
+}
+
+.logo > h1 {
+  font-weight: 700;
+  font-style: italic;
+}
+
+.logo > span {
+  font-weight: 200;
+  font-style: italic;
 }
 
 button {
@@ -54,15 +68,52 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+main {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  width: 100%;
+}
+
+main > * {
+  border: 1px solid white;
+  padding: 0px 32px;
+  margin: 8px;
+  height: 360px;
+}
+
+ul, ol, li {
+  padding: 0;
+  list-style: none;
+}
+
+.yellow {
+  color: yellow;
+}
+
+.green {
+  color: limegreen;
+}
+
+.red {
+  color: red;
+}
+
+.orange {
+  color: orange;
+}
+
+.pink {
+  color: pink;
+}
+
+.white {
+  color: white;
+}
+
+.purple {
+  color: fuchsia;
+}
+
+.blue {
+  color: dodgerblue;
 }
