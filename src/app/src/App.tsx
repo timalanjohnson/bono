@@ -6,14 +6,12 @@ connection.onopen = function (e) {
 };
 
 function App() {
-  const [messages, setMessages] = useState<Array<string>>([
-    "Increase front wing",
-  ]);
+  const [data, setData] = useState<Array<string>>([]);
 
   useEffect(() => {
     connection.onmessage = function (e) {
-      console.log(e.data);
-      setMessages((prev) => [...prev, e.data]);
+      const m = JSON.parse(e.data);
+      setData((prev) => [...prev, m]);
     };
   }, []);
 
@@ -25,7 +23,7 @@ function App() {
         <Session />
         <Damage />
         <PitStop />
-        <Messages messages={messages} />
+        <Messages messages={data} />
       </main>
       <div className="logo">
         <h1>BONO</h1>
@@ -123,16 +121,14 @@ function Session() {
 }
 
 type MessagesProps = {
-  messages: Array<string>;
+  messages: Array<any>;
 };
 function Messages({ messages }: MessagesProps) {
   return (
     <div className="purple">
       <h2>MESSAGES</h2>
       <ul>
-        {messages.map((message) => (
-          <li>{message}</li>
-        ))}
+        <li>{messages.length}</li>
       </ul>
     </div>
   );

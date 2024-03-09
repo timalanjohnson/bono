@@ -1,6 +1,9 @@
 package main
 
 import (
+	"bytes"
+	"encoding/binary"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net"
@@ -10,7 +13,7 @@ import (
 )
 
 var clients = make(map[*websocket.Conn]bool)
-var broadcast = make(chan string)
+var broadcast = make(chan []byte)
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
@@ -29,7 +32,8 @@ func main() {
 		}
 	}()
 
-	address := "127.0.0.1:9999"
+	address := ":20777"
+	fmt.Printf("Attempting to resolve %s\n", address)
 	udpAddress, err := net.ResolveUDPAddr("udp", address)
 	if err != nil {
 		log.Fatal(err)
@@ -40,27 +44,54 @@ func main() {
 	}
 	defer conn.Close()
 
-	fmt.Println("UDP server listening on 127.0.0.1:9999")
+	fmt.Printf("UDP server listening on %s\n", address)
 	fmt.Println("WebSocket server listening on port :8080")
 
-	buffer := make([]byte, 1024)
+	buffer := make([]byte, (1024 * 4))
 	for {
 		n, _, err := conn.ReadFromUDP(buffer)
 		if err != nil {
 			log.Println(err)
 			continue
 		}
-		message := string(buffer[:n])
-		fmt.Printf("%s", message)
-		broadcast <- string(message)
+
+		go parsePacket(buffer[:n])
 	}
+}
+
+func parsePacket(packetBytes []byte) {
+	header := parsePacketHeader(packetBytes)
+	switch header.PacketID {
+	case 0:
+		motionData := parsePacketMotionData(packetBytes)
+		message, _ := json.Marshal(motionData)
+		broadcast <- message
+	}
+}
+
+func parsePacketHeader(packetBytes []byte) PacketHeader {
+	header := PacketHeader{}
+	err := binary.Read(bytes.NewReader(packetBytes), binary.LittleEndian, &header)
+	if err != nil {
+		log.Printf("Failed to decode PacketHeader: %s", err)
+	}
+	return header
+}
+
+func parsePacketMotionData(packetBytes []byte) PacketMotionData {
+	motionData := PacketMotionData{}
+	err := binary.Read(bytes.NewReader(packetBytes), binary.LittleEndian, &motionData)
+	if err != nil {
+		log.Printf("Failed to decode PacketMotionData: %s", err)
+	}
+	return motionData
 }
 
 func handleMessages() {
 	for {
-		msg := <-broadcast
+		message := <-broadcast
 		for client := range clients {
-			err := client.WriteMessage(websocket.TextMessage, []byte(msg))
+			err := client.WriteMessage(websocket.TextMessage, []byte(message))
 			if err != nil {
 				log.Printf("write error: %v", err)
 				client.Close()
